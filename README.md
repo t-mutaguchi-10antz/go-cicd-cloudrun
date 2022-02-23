@@ -523,7 +523,7 @@ jobs:
 
 この yaml を Code Repo の `.github/workflows` 配下に設置する事で、GitHub Actions が設定される。
 
-GitHub のブランチ保護を設定を以下のように設定する。
+GitHub のブランチ保護設定を以下のように設定する。
 
 ![](img/github_protect_branch.png)
 
@@ -537,83 +537,40 @@ GitHub のブランチ保護を設定を以下のように設定する。
 
 ### 2-3-2. Cloud Build の設定
 
-#### トリガー設定 - 1
+Cloud Build のトリガー設定を行う、初期設定は Cloud Run 側から行う。
 
-1. Cloud Build のトリガー設定を行う
-2. 初期設定は Cloud Run 側から行うのが楽
+![](img/gcp_cloud_build_trigger_1.png)
 
-![](img/gcp_cloud_run_cd.png)
+この時、Cloud Build 用に作成した GitHub アカウントの登録などを行う。
 
 #### トリガー設定 - 2
 
-1. Cloud Build のトリガー設定から yaml をコピー
-2. .gcloud/build.yaml として作成する
+Cloud Build 側のトリガー設定では以下のように設定する。
 
-![](img/gcp_build_trigger.png)
+![](img/gcp_cloud_build_trigger_2.png)
 
 #### トリガー設定 - 3
 
-1. Go がプライベートリポジトリへアクセスできるように設定
+Cloud Build の VM 上からプライベートリポジトリへアクセスできるよう、`--build-arg` の設定を追加する。
 
-```yaml [1-45|11-12]
-steps:
-  - name: gcr.io/cloud-builders/docker
-    args:
-      - build
-      - "--no-cache"
-      - "-t"
-      - "$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA"
-      - .
-      - "-f"
-      - Dockerfile
-      - "--build-arg"
-      - "GITHUB_TOKEN=$_GITHUB_TOKEN"
-    id: Build
-  - name: gcr.io/cloud-builders/docker
-    args:
-      - push
-      - "$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA"
-    id: Push
-  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk:slim"
-    args:
-      - run
-      - services
-      - update
-      - $_SERVICE_NAME
-      - "--platform=managed"
-      - "--image=$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA"
-      - >-
-        --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID,$_LABELS
-      - "--region=$_DEPLOY_REGION"
-      - "--quiet"
-    id: Deploy
-    entrypoint: gcloud
-images:
-  - "$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA"
-options:
-  substitutionOption: ALLOW_LOOSE
-substitutions:
-  _LABELS: gcb-trigger-id=72f5f423-a7e5-4dfa-880f-673bf5e6140e
-  _TRIGGER_ID: 72f5f423-a7e5-4dfa-880f-673bf5e6140e
-  _DEPLOY_REGION: asia-northeast1
-  _GCR_HOSTNAME: asia.gcr.io
-  _PLATFORM: managed
-  _SERVICE_NAME: go-cicd-cloudrun
-tags:
-  - gcp-cloud-build-deploy-cloud-run
-  - gcp-cloud-build-deploy-cloud-run-managed
-  - go-cicd-cloudrun
+![](img/gcp_cloud_build_trigger_3.png)
+
+```
+- "--build-arg"
+- "GITHUB_TOKEN=$_GITHUB_TOKEN"
 ```
 
 #### トリガー設定 - 4
 
-![](img/gcp_cloud_build_location.png)
+上述のビルドオプションに渡す環境変数を設定する。
 
-![](img/gcp_cloud_build_var.png)
+![](img/gcp_cloud_build_trigger_4.png)
 
-必要な設定は以上で完了、<br>GitHub で PR のマージを行うと Cloud Run へのデプロイが行われる
+必要な設定は以上で完了、GitHub で PR のマージを行うと Cloud Run へのデプロイが行われる事を確認する。
 
-これで実行環境の認証情報を外部に持たせる事なく、<br>GitHub を中心とした CI/CD を実現できた事になる
+---
+
+ここまでの工程を終えれば、実行環境の認証情報を GitHub に持たせる事なく、Code Repo を中心とした GitOps を実践可能となる。
 
 # 3. おまけ
 
