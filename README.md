@@ -499,6 +499,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - name: Get dependencies
+        run: go get -v -t -d ./...
+
       - name: Configure git for private modules
         env:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
@@ -510,7 +518,7 @@ jobs:
           version: latest
 
       - name: Unit test
-        run: go test ...
+        run: go test -v .
 ```
 
 この yaml を Code Repo の `.github/workflows` 配下に設置する事で、GitHub Actions が設定される。
