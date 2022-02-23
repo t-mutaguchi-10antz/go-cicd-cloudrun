@@ -1,4 +1,4 @@
-# CI/CD on Cloud Run
+# CI/CD ( GitOps ) on Cloud Run
 
 [![check](https://github.com/t-mutaguchi-10antz/go-cicd-cloudrun/workflows/check/badge.svg)](https://github.com/t-mutaguchi-10antz/go-cicd-cloudrun/actions)
 
