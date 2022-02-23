@@ -472,23 +472,17 @@ Cloud Build 側から Code Repo リポジトリにシークレットを登録す
 
 ![](img/github_secret.png)
 
-Git リポジトリの運用手法においては `GitLab-flow` を実践できるよう、GitHub Actions を設定する。
-
-#### GitLab-flow ルール
+Git リポジトリの運用手法においては以下のルールで GitHub Actions を設定する。
 
 - トリガーをもって Lint とユニットテストを実施する
-- `dev/*` ブランチへプッシュすると統合環境 ( 開発 ) へデプロイする
-- `main` ブランチへプッシュすると統合環境 ( ステージング ) へデプロイする
-  - `main` ブランチは `dev/*` ブランチからの PR のみ許容する
-- `v*` タグをプッシュすると本番環境へデプロイする ( 本記事では設定しない )
-  - `v*` タグは `main` ブランチから作成した場合のみ許容する
+- `main` ブランチへプッシュすると開発環境へデプロイする
+- `v*` タグをプッシュすると本番環境へデプロイする ( 本記事では本番環境は用意しない )
 
 ```yaml
 name: check
 on:
   push:
     branches:
-      - dev/*
       - main
     tags:
       - v*
@@ -521,7 +515,7 @@ jobs:
 
 この yaml を Code Repo の `.github/workflows` 配下に設置する事で、GitHub Actions が設定される。
 
-GitHub のブランチ保護を設定し、チェックが通らないとマージできないようにする。
+GitHub のブランチ保護を設定を以下のように設定する。
 
 ![](img/github_protect_branch.png)
 
