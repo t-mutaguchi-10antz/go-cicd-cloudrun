@@ -519,7 +519,7 @@ GitHub のブランチ保護を設定を以下のように設定する。
 
 ![](img/github_protect_branch.png)
 
-プルリクエストの一覧。
+`feature/xxx` ブランチから `main` ブランチに PR を送ると、マージがブロックされている事が確認できる。
 
 ![](img/github_pull_request.png)
 
