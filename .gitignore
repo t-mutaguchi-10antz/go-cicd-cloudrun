@@ -1,0 +1,12 @@
+# OS files
+.DS_Store
+
+# dot files
+.env
+.idea
+.vscode
+
+# project temporary files
+build
+tmp
+data
