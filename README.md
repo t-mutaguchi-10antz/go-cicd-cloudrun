@@ -472,23 +472,17 @@ Cloud Build 側から Code Repo リポジトリにシークレットを登録す
 
 ![](img/github_secret.png)
 
-Git リポジトリの運用手法においては `GitLab-flow` を実践できるよう、GitHub Actions を設定する。
+Git リポジトリの運用手法においては以下のルールで GitHub Actions を設定する。
 
-#### GitLab-flow ルール
-
-- トリガーをもって Lint とユニットテストを実施する
-- `dev/*` ブランチへプッシュすると統合環境 ( 開発 ) へデプロイする
-- `main` ブランチへプッシュすると統合環境 ( ステージング ) へデプロイする
-  - `main` ブランチは `dev/*` ブランチからの PR のみ許容する
-- `v*` タグをプッシュすると本番環境へデプロイする ( 本記事では設定しない )
-  - `v*` タグは `main` ブランチから作成した場合のみ許容する
+- チェックは Lint とユニットテストを実施する
+- `main` ブランチへプッシュするとチェックが起動する
+- `v*` タグをプッシュするとチェックが起動する ( 本記事では本番環境は用意しない )
 
 ```yaml
 name: check
 on:
   push:
     branches:
-      - dev/*
       - main
     tags:
       - v*
@@ -505,10 +499,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+
       - name: Configure git for private modules
         env:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         run: git config --global url."https://${ACCESS_TOKEN}@github.com".insteadOf "https://github.com"
+
+      - name: Get dependencies
+        run: go get -v -t -d ./...
 
       - name: Lint
         uses: golangci/golangci-lint-action@v2
@@ -516,20 +518,22 @@ jobs:
           version: latest
 
       - name: Unit test
-        run: go test ...
+        run: go test -v ./...
 ```
 
 この yaml を Code Repo の `.github/workflows` 配下に設置する事で、GitHub Actions が設定される。
 
-GitHub のブランチ保護を設定し、チェックが通らないとマージできないようにする。
+GitHub のブランチ保護を設定を以下のように設定する。
 
 ![](img/github_protect_branch.png)
 
-プルリクエストの一覧。
+`feature/xxx` ブランチから `main` ブランチに PR を送ると、ステータスが表示されるようになっている。設定に基づき、チェックが通らないとマージできない事が確認できる。
 
 ![](img/github_pull_request.png)
 
-ステータスが表示されるようになっている。設定に基づき、チェックが通らないとマージできない事が確認できる。
+レビューとチェックを通過すれば、マージが可能になる。
+
+![](img/github_pull_request_ok.png)
 
 ### 2-3-2. Cloud Build の設定
 

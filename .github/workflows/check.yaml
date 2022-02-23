@@ -2,7 +2,6 @@ name: check
 on:
   push:
     branches:
-      - dev/*
       - main
     tags:
       - v*
@@ -19,10 +18,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+
       - name: Configure git for private modules
         env:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         run: git config --global url."https://${ACCESS_TOKEN}@github.com".insteadOf "https://github.com"
+
+      - name: Get dependencies
+        run: go get -v -t -d ./...
 
       - name: Lint
         uses: golangci/golangci-lint-action@v2
@@ -30,4 +37,4 @@ jobs:
           version: latest
 
       - name: Unit test
-        run: go test ...
+        run: go test -v ./...
