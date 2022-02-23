@@ -523,7 +523,7 @@ jobs:
 
 この yaml を Code Repo の `.github/workflows` 配下に設置する事で、GitHub Actions が設定される。
 
-GitHub のブランチ保護設定を以下のように設定する。
+GitHub のブランチ保護設定を以下のように行う。
 
 ![](img/github_protect_branch.png)
 
