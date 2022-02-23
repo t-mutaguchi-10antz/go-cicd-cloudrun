@@ -1,5 +1,7 @@
 # CI/CD on Cloud Run
 
+[![check](https://github.com/t-mutaguchi-10antz/go-cicd-cloudrun/workflows/check/badge.svg)](https://github.com/t-mutaguchi-10antz/go-cicd-cloudrun/actions)
+
 # 目次
 
 1. 前置
@@ -568,9 +570,16 @@ Cloud Build の VM 上からプライベートリポジトリへアクセスで�
 
 必要な設定は以上で完了、GitHub で PR のマージを行うと Cloud Run へのデプロイが行われる事を確認する。
 
+#### 環境変数を設定
+
+The 12 Factor App に従い、アプリケーション実装時に環境変数を使うようにしておけば、実行環境に依る変数は Cloud Run 側の設定で変更が可能。
+
+![](img/gcp_cloud_run_env.png)
+
 ---
 
 ここまでの工程を終えれば、実行環境の認証情報を GitHub に持たせる事なく、Code Repo を中心とした GitOps を実践可能となる。
+
 
 # 3. おまけ
 
@@ -583,9 +592,9 @@ GCP だとどんなメリットがあるのか、Cloud Run の場合を紹介。
 ![](img/gcp_cloud_logging.png)
 
 - HTTP(S) サーバーであれば、標準でアクセスログを出力
-- アプリケーションから標準出力したログも出力
-- 標準出力の際 JSON 形式にすれば独自の付属データを含める事も可能
-  - ログの設計次第で、BigQuery を介しての分析用途としても使えそう
+- アプリケーションログも出力可能
+- 出力を JSON 形式にしておけば、独自の付属データを含める事も可能
+  - ログの設計次第で、BigQuery を介しての分析用途としても使用可能
 
 ### 3-1-2. Cloud Monitoring
 
